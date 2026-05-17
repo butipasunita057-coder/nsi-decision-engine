@@ -226,7 +226,8 @@
 - **可见文字**：
   - GitHub 仓库 URL（大字 + 加粗）：
     > **github.com/butipasunita057-coder/nsi-decision-engine**
-  - tag：`v1.0-demo`（路演版本快照）
+  - 开发证据：GitHub commit 时间线完整可查
+    - 路演版本：以 `master` 分支最新提交为准
   - 团队信息（小一号）：成员姓名 / 角色（产品、开发、汇报）
   - 工具栈致谢（最小一号）：Streamlit · Python · **Qoder**（开发 IDE） · Git · GitHub
   - 中央底部：**谢谢评委**
