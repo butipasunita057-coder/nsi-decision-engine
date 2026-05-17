@@ -40,9 +40,9 @@ COLOR_LABEL: dict[str, str] = {
 
 # 归因 P / L / S / M 的中文解释（T10 卡片归因徽标用）
 ATTRIBUTION_TEXT: dict[str, str] = {
-    "P": "Product · 产品端问题",
-    "L": "Listing · 页面端问题",
-    "S": "Service · 服务端问题",
+    "P": "Product · 产品本身问题",
+    "L": "Listing · 页面表达问题",
+    "S": "Service · 服务 / 物流问题",
     "M": "Malicious · 疑似恶意评论",
 }
 
@@ -316,9 +316,9 @@ def _render_feature_card(index: int, feat: dict) -> None:
         head_cols[0].markdown(f"<div style='font-size:34px;line-height:1'>{emoji}</div>", unsafe_allow_html=True)
         head_cols[1].markdown(
             f"### {index}. {feature_name}\n"
-            f"**{color_zh}** · NSI = `{nsi_str}` · 归因：`{attribution_key or '?'}` — {attribution_label}"
+            f"**{color_zh}** · Echo Score = `{nsi_str}` · 归因：`{attribution_key or '?'}` — {attribution_label}"
         )
-        head_cols[2].metric("NSI", nsi_str)
+        head_cols[2].metric("Echo Score", nsi_str)
 
         meta_cols = st.columns(3)
         meta_cols[0].markdown(f"👍 正面提及：**{positive}**")
@@ -405,10 +405,14 @@ def _render_result(asin: str, asin_data: dict) -> None:
 # 主入口
 # --------------------------------------------------------------------------
 def main() -> None:
-    st.set_page_config(page_title="NSI 决策引擎", page_icon="🟢", layout="wide")
+    st.set_page_config(page_title="Echofy", page_icon="🟢", layout="wide")
 
-    st.title("NSI 决策引擎")
-    st.subheader("先改哪个，怎么改")
+    st.title("Echofy")
+    st.subheader("把评论噪音变成改品优先级")
+    st.caption(
+        "Echo Score 基于正负向评论提及差异和总提及量计算，"
+        "用来衡量某个产品特征的评论健康度。"
+    )
     st.caption(DEMO_DISCLAIMER)
 
     data = load_data()

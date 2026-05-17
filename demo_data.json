@@ -206,5 +206,110 @@
         ]
       }
     ]
+  },
+  "B0DEMO-BROW": {
+    "asin": "B0DEMO-BROW",
+    "title": "B0DEMO-BROW · 双色長久不脱色眉粉",
+    "category": "Beauty / Makeup",
+    "summary": "黑客松本地演示数据。产品本身显色与持久度口碑较好，但色号图片拍不清、描述不准，导致买家预期与实物不一致，是典型的 L / Listing 页面表达问题。",
+    "features": [
+      {
+        "feature_id": "F1",
+        "feature_name": "色号图片清晰度",
+        "positive": 2,
+        "negative": 20,
+        "total": 24,
+        "attribution": "L",
+        "diagnosis": "页面图片没有拍清楚，色号展示不准，导致买家预期和实物不一致。这是当前最典型的 Listing 问题。",
+        "action": "重拍色号对比图，增加真人上妆效果图，明确冷暖调和深浅色。",
+        "listing_rewrite": "在主图和 A+ 页加入自然光 / 室内光对比图，并标注适合肤色；不再在文案中使用「叠加」「任何肤色」等过于绝对的描述。",
+        "examples": [
+          {"polarity": "negative", "text": "The shade in the listing photo looks completely different from what I received."},
+          {"polarity": "negative", "text": "Image is too dark, I cannot tell if this is cool tone or warm tone."},
+          {"polarity": "negative", "text": "Picture shows a light brown but the actual product is almost black."},
+          {"polarity": "positive", "text": "Once I saw a real-life swatch on YouTube it matched, but the listing photo was misleading."}
+        ]
+      },
+      {
+        "feature_id": "F2",
+        "feature_name": "色号名称与描述",
+        "positive": 5,
+        "negative": 10,
+        "total": 18,
+        "attribution": "L",
+        "diagnosis": "18 条评价中 10 条提到「色号名称含糊」或「色号描述与实物不一致」，是可以通过改文案低成本修复的 Listing 问题。",
+        "action": "重写色号描述，为每个色号增加「适合肤色 / 适合发色 / 冷暖调」三个明确标签。",
+        "listing_rewrite": "色号名从「Natural Brown」改为「Warm Brown #02 · 适合黄一白皮 / 棕黄发色」，减少歧义。",
+        "examples": [
+          {"polarity": "negative", "text": "Shade name says natural brown but it's way too red on me."},
+          {"polarity": "negative", "text": "Description says suitable for all hair colors, definitely not true."},
+          {"polarity": "positive", "text": "Once I figured out the right shade by trial it works fine."}
+        ]
+      },
+      {
+        "feature_id": "F3",
+        "feature_name": "显色与上色效果",
+        "positive": 12,
+        "negative": 2,
+        "total": 16,
+        "attribution": "P",
+        "diagnosis": "产品本身的显色与上色效果口碑稳定，16 条评论中 12 条正向，是应突出的产品优势。",
+        "action": "保持当前色粉配方与压桊工艺，下一批次不要降本。",
+        "listing_rewrite": "在五点描述首条强调「一笔上色、自然填充」，作为产品主卖点。",
+        "examples": [
+          {"polarity": "positive", "text": "Pigment is great, fills in sparse brows in one swipe."},
+          {"polarity": "positive", "text": "Looks very natural, not patchy at all."},
+          {"polarity": "negative", "text": "Slightly too pigmented for me, had to use a light hand."}
+        ]
+      },
+      {
+        "feature_id": "F4",
+        "feature_name": "持久度",
+        "positive": 11,
+        "negative": 3,
+        "total": 15,
+        "attribution": "P",
+        "diagnosis": "持久度 15 条评价中 11 条正向，收到「不脱妆1小时」「不晕染」反馈，是产品稳定质量点。",
+        "action": "维持现有防水配方；可考虑上架加防汗版本形成产品线。",
+        "listing_rewrite": "在主图上加「All-day wear / 防汗不晕染」角标，与色号图区分。",
+        "examples": [
+          {"polarity": "positive", "text": "Lasted through a workout without smudging."},
+          {"polarity": "positive", "text": "Stays on all day, even in humid weather."},
+          {"polarity": "negative", "text": "Faded a bit by evening but still acceptable."}
+        ]
+      },
+      {
+        "feature_id": "F5",
+        "feature_name": "物流与包装",
+        "positive": 4,
+        "negative": 8,
+        "total": 14,
+        "attribution": "S",
+        "diagnosis": "14 条评价中 8 条负面，集中在包装护套不足导致笔身出现压痕与到货慢，属于服务 / 物流问题。",
+        "action": "调整仓储包装为独立纸盒 + 海绵护套，与清关复状上门送达时效。",
+        "listing_rewrite": "本字段不需改 listing 文案，重点在后台仓储与物流作业。",
+        "examples": [
+          {"polarity": "negative", "text": "Pencil tip arrived broken, packaging was just a thin plastic bag."},
+          {"polarity": "negative", "text": "Took 2 weeks to arrive, ridiculous shipping time."},
+          {"polarity": "positive", "text": "Shipping was fast via Prime, packaging was OK."}
+        ]
+      },
+      {
+        "feature_id": "F6",
+        "feature_name": "同行恶意差评",
+        "positive": 0,
+        "negative": 4,
+        "total": 4,
+        "attribution": "M",
+        "diagnosis": "4 条负面评论集中在 24 小时内出现，文本高度相似且引导购买竞品，疑似同行恶意攻击。",
+        "action": "通过 Amazon Report Abuse 提交证据链，请求平台核查并删除。",
+        "listing_rewrite": "本字段不应基于此类评论调整任何文案。",
+        "examples": [
+          {"polarity": "negative", "text": "Worst eyebrow product ever. Buy CompetitorX instead."},
+          {"polarity": "negative", "text": "1 star. Don't waste your money."},
+          {"polarity": "negative", "text": "Trash. Look at the other brand link."}
+        ]
+      }
+    ]
   }
 }
