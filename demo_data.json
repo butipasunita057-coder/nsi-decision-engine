@@ -1,0 +1,210 @@
+{
+  "B0DEMO-CUP": {
+    "asin": "B0DEMO-CUP",
+    "title": "B0DEMO-CUP · 不锈钢真空保温杯 500ml",
+    "category": "Kitchen / Drinkware",
+    "summary": "黑客松本地演示数据。整体保温与容量口碑较好，但杯盖密封、物流和页面描述存在明显短板，且出现疑似恶意差评。",
+    "features": [
+      {
+        "feature_id": "F1",
+        "feature_name": "保温性能",
+        "positive": 18,
+        "negative": 2,
+        "total": 20,
+        "attribution": "P",
+        "diagnosis": "保温性能在 20 条相关评价中以 18:2 大幅正向，是当前最稳的卖点。",
+        "action": "维持现有真空层结构与不锈钢规格，避免在下一批次降本时削减保温层。",
+        "listing_rewrite": "在主图与五点描述首条强调『12 小时保温 / 24 小时保冷』，把保温性能作为核心卖点。",
+        "examples": [
+          {"polarity": "positive", "text": "Kept my coffee hot for almost 10 hours, very impressed."},
+          {"polarity": "positive", "text": "Ice water was still cold the next morning, great vacuum insulation."},
+          {"polarity": "negative", "text": "Stayed warm for only about 4 hours, not as long as advertised."}
+        ]
+      },
+      {
+        "feature_id": "F2",
+        "feature_name": "杯盖密封性",
+        "positive": 2,
+        "negative": 18,
+        "total": 20,
+        "attribution": "P",
+        "diagnosis": "杯盖密封是当前最严重的产品问题，20 条评价中 18 条抱怨漏水，已显著拉低复购意愿。",
+        "action": "更换硅胶圈材质并增加扭矩测试；在 QC 抽检中加入倒置 30 秒漏水测试。",
+        "listing_rewrite": "暂不在 listing 中宣传『防漏』，直至工厂端密封问题修复并通过抽检。",
+        "examples": [
+          {"polarity": "negative", "text": "Leaked all over my backpack on the first day, ruined my laptop sleeve."},
+          {"polarity": "negative", "text": "The lid does not seal tightly, water drips out when tilted."},
+          {"polarity": "positive", "text": "Lid feels okay if you screw it on very carefully."}
+        ]
+      },
+      {
+        "feature_id": "F3",
+        "feature_name": "商品描述准确度",
+        "positive": 5,
+        "negative": 10,
+        "total": 15,
+        "attribution": "L",
+        "diagnosis": "页面描述与实物存在偏差（容量、重量、颜色），15 条相关评价中 10 条提到货不对板，属于可低成本修复的 listing 问题。",
+        "action": "重新测量实物尺寸 / 重量 / 容量，并校正主图色卡；在 A+ 页加入实拍尺寸对照图。",
+        "listing_rewrite": "标题与五点把容量精确写为『500ml (17oz)』，移除『轻巧便携』等易引发预期落差的模糊措辞。",
+        "examples": [
+          {"polarity": "negative", "text": "Listing said 600ml but the actual capacity is closer to 500ml."},
+          {"polarity": "negative", "text": "Color in the picture looks navy blue but the real item is almost black."},
+          {"polarity": "positive", "text": "Description matched what I received, no surprises."}
+        ]
+      },
+      {
+        "feature_id": "F4",
+        "feature_name": "物流配送",
+        "positive": 3,
+        "negative": 14,
+        "total": 17,
+        "attribution": "S",
+        "diagnosis": "物流相关评价 17 条中 14 条负面，集中在到货慢与外箱破损，属于服务侧问题，与产品本身无关。",
+        "action": "切换到 FBA 备货并升级外箱抗压等级；与现有第三方仓沟通包装规范。",
+        "listing_rewrite": "本字段不需要改 listing 文案；可在卖家后台设置更准确的预计送达时间。",
+        "examples": [
+          {"polarity": "negative", "text": "Took almost three weeks to arrive, way longer than estimated."},
+          {"polarity": "negative", "text": "Outer box arrived crushed, lucky the cup itself was fine."},
+          {"polarity": "positive", "text": "Shipping was quick via Prime, arrived in two days."}
+        ]
+      },
+      {
+        "feature_id": "F5",
+        "feature_name": "容量大小",
+        "positive": 10,
+        "negative": 4,
+        "total": 14,
+        "attribution": "P",
+        "diagnosis": "500ml 容量在通勤和办公场景下口碑稳健，是次于保温性能的第二大卖点。",
+        "action": "保持当前 500ml 主推规格；可考虑后续上架 350ml 与 750ml 形成产品线。",
+        "listing_rewrite": "在 A+ 页加入与常见马克杯、星巴克 Tall/Grande 杯的容量对比图，强化『一杯顶两杯』。",
+        "examples": [
+          {"polarity": "positive", "text": "500ml is just right for my morning commute."},
+          {"polarity": "positive", "text": "Holds enough water for a full workout session."},
+          {"polarity": "negative", "text": "Wish there was a larger 750ml version available."}
+        ]
+      },
+      {
+        "feature_id": "F6",
+        "feature_name": "疑似恶意差评",
+        "positive": 0,
+        "negative": 5,
+        "total": 5,
+        "attribution": "M",
+        "diagnosis": "5 条短文本差评集中在 48 小时内、IP 高度相似且与本商品功能描述无关，疑似同行恶意攻击。",
+        "action": "通过 Amazon Report Abuse 与 Brand Registry 提交 5 条评论的 ASIN/Reviewer ID 证据，请求平台核查并删除。",
+        "listing_rewrite": "本字段不应基于此类评论修改 listing 文案，避免被恶意评论牵着走。",
+        "examples": [
+          {"polarity": "negative", "text": "1 star. Bad. Will not buy again."},
+          {"polarity": "negative", "text": "Terrible product, no further details given."},
+          {"polarity": "negative", "text": "Do not buy from this seller, look at competitor X instead."}
+        ]
+      }
+    ]
+  },
+  "B0DEMO-YOGA": {
+    "asin": "B0DEMO-YOGA",
+    "title": "B0DEMO-YOGA · 高腰塑形瑜伽裤 (女款)",
+    "category": "Apparel / Sportswear",
+    "summary": "黑客松本地演示数据。面料和客服口碑良好，但尺码与图片色差是当前最大风险点，且存在疑似恶意攻击型差评。",
+    "features": [
+      {
+        "feature_id": "F1",
+        "feature_name": "面料弹性",
+        "positive": 22,
+        "negative": 3,
+        "total": 25,
+        "attribution": "P",
+        "diagnosis": "面料弹性是该 SKU 最稳定的核心卖点，25 条评价中 22 条正向，明显高于品类均值。",
+        "action": "维持当前尼龙 / 氨纶混纺配比，在下批次中保持同一供应商。",
+        "listing_rewrite": "在主图与五点首条强调『四向弹力 / 不卷边 / 深蹲不透』，把面料作为差异化主卖点。",
+        "examples": [
+          {"polarity": "positive", "text": "Super stretchy and comfortable, great for hot yoga."},
+          {"polarity": "positive", "text": "The fabric does not roll down during squats, finally."},
+          {"polarity": "negative", "text": "Felt a bit thin around the waistband for cold weather."}
+        ]
+      },
+      {
+        "feature_id": "F2",
+        "feature_name": "尺码偏差",
+        "positive": 4,
+        "negative": 18,
+        "total": 22,
+        "attribution": "L",
+        "diagnosis": "尺码相关评价 22 条中 18 条负面，明显偏小一码，是当前最大的退货来源，但属于可通过 listing 与尺码表低成本修复的问题。",
+        "action": "更新尺码表，增加体重区间与裤长实测值；考虑在标题加上『建议大一码』的提示。",
+        "listing_rewrite": "在 A+ 页加入真人模特身高 / 体重 / 所穿尺码对照表，并在五点加入『Runs small, please size up』。",
+        "examples": [
+          {"polarity": "negative", "text": "Ordered my usual size M, way too tight, had to return."},
+          {"polarity": "negative", "text": "Sizing chart is misleading, definitely runs at least one size small."},
+          {"polarity": "positive", "text": "Sized up by one and it fits perfectly."}
+        ]
+      },
+      {
+        "feature_id": "F3",
+        "feature_name": "缝线工艺",
+        "positive": 6,
+        "negative": 10,
+        "total": 16,
+        "attribution": "P",
+        "diagnosis": "16 条相关评价中有 10 条提到裆部 / 后腰缝线开线或起球，属于明显的产品质量问题，但未到红色级别。",
+        "action": "与工厂复盘高应力部位（裆部、后腰）的针距与线材，引入抽样拉力测试。",
+        "listing_rewrite": "暂不在 listing 中宣传『加固缝线』直至工艺修复，可先去掉过度承诺的措辞。",
+        "examples": [
+          {"polarity": "negative", "text": "Stitching at the crotch came apart after the second wash."},
+          {"polarity": "negative", "text": "Some pilling around the inner thigh after a few uses."},
+          {"polarity": "positive", "text": "Stitches looked clean and even when I unboxed it."}
+        ]
+      },
+      {
+        "feature_id": "F4",
+        "feature_name": "客服响应",
+        "positive": 11,
+        "negative": 3,
+        "total": 14,
+        "attribution": "S",
+        "diagnosis": "客服 / 售后体验 14 条评价中 11 条正向，是值得作为品牌信任背书的卖点。",
+        "action": "维持当前 24 小时内首响应 SLA，将退换货话术沉淀为 FAQ 模板。",
+        "listing_rewrite": "在 A+ 页加入『30 天无理由退换 + 24 小时客服』的服务承诺图标。",
+        "examples": [
+          {"polarity": "positive", "text": "Customer service responded within a few hours and processed my return quickly."},
+          {"polarity": "positive", "text": "They sent a replacement size for free, very nice experience."},
+          {"polarity": "negative", "text": "Took a couple of emails to get a response on a refund."}
+        ]
+      },
+      {
+        "feature_id": "F5",
+        "feature_name": "图片色差",
+        "positive": 4,
+        "negative": 8,
+        "total": 12,
+        "attribution": "L",
+        "diagnosis": "12 条相关评价中 8 条提到实物比图片偏暗 / 偏灰，属于可通过重拍主图低成本修复的 listing 问题。",
+        "action": "在自然光下重拍主图与变体图，并在 A+ 页加入色卡对照。",
+        "listing_rewrite": "在变体名称与图片下方标注『实物颜色以最后一张色卡图为准』。",
+        "examples": [
+          {"polarity": "negative", "text": "The color in the photo is much brighter than the actual fabric."},
+          {"polarity": "negative", "text": "Looked navy online but is closer to dark gray in person."},
+          {"polarity": "positive", "text": "Color matched the listing exactly under daylight."}
+        ]
+      },
+      {
+        "feature_id": "F6",
+        "feature_name": "同行恶意差评",
+        "positive": 0,
+        "negative": 4,
+        "total": 4,
+        "attribution": "M",
+        "diagnosis": "4 条短差评在同一天内集中出现，文本几乎一致且引导购买竞品，疑似同行恶意攻击。",
+        "action": "通过 Amazon Brand Registry 提交 Report Abuse，附带评论时间线与文本相似度证据，请求平台核查。",
+        "listing_rewrite": "本字段不应基于此类评论调整 listing 文案，避免被恶意评论误导改品方向。",
+        "examples": [
+          {"polarity": "negative", "text": "Bad quality, buy from BrandX instead."},
+          {"polarity": "negative", "text": "Don't buy. Trust me. Look at competitor link."},
+          {"polarity": "negative", "text": "1 star. Will not recommend."}
+        ]
+      }
+    ]
+  }
+}
