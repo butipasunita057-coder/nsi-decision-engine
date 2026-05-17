@@ -1,15 +1,11 @@
-"""NSI 决策引擎 · Streamlit 主应用（T3~T8 阶段）
+"""NSI 决策引擎 · Streamlit 主应用（T3~T12 阶段）
 
-本文件在 T1 骨架基础上加入：
-- T3 数据加载（load_data, @st.cache_data）
-- T4 ASIN 输入与示例选择（selectbox + text_input + Analyze 按钮）
-- T5 NSI 计算函数（calc_nsi）
-- T6 红黄绿分类（classify_color + 阈值常量）
-- T7 特征排序（sort_features）
-- T8 整体健康度评分（health_score + health_label）
-
-UI 仅做最小可验收版本：标题、副标题、选择控件、健康度指标、
-红黄绿灰计数、排序后的特征表。彩色卡片、详情展开等留给 T9~T11。
+T1 骨架 + T3~T8 核心算法（数据加载、ASIN 输入、NSI 计算、颜色分类、
+排序、整体健康度）保持原样，本轮在 UI 上叠加：
+- T9  分析概览（标题 / ASIN / 类目 / 摘要 / 健康度 / 红黄绿灰计数）
+- T10 彩色特征卡片（emoji + NSI + 计数 + 归因 + 推荐动作）
+- T11 详情展开（examples / diagnosis / action / listing_rewrite）
+- T12 友好错误兜底（数据缺失、字段缺失、ASIN 错误、空特征等）
 """
 
 from __future__ import annotations
@@ -25,6 +21,36 @@ import streamlit as st
 # --------------------------------------------------------------------------
 RED_THRESHOLD: float = -0.5
 YELLOW_THRESHOLD: float = 0.0
+
+# 颜色 emoji 映射（T10 卡片左侧大字符）
+COLOR_EMOJI: dict[str, str] = {
+    "red": "🔴",
+    "yellow": "🟡",
+    "green": "🟢",
+    "gray": "⚪",
+}
+
+# 颜色对应的中文档位标签（T10 卡片副标题用）
+COLOR_LABEL: dict[str, str] = {
+    "red": "紧急修复",
+    "yellow": "持续优化",
+    "green": "保持卖点",
+    "gray": "数据缺失",
+}
+
+# 归因 P / L / S / M 的中文解释（T10 卡片归因徽标用）
+ATTRIBUTION_TEXT: dict[str, str] = {
+    "P": "Product · 产品端问题",
+    "L": "Listing · 页面端问题",
+    "S": "Service · 服务端问题",
+    "M": "Malicious · 疑似恶意评论",
+}
+
+# 顶部 / 底部展示的本地演示声明（黑客松合规说明）
+DEMO_DISCLAIMER: str = (
+    "本 Demo 使用本地预置演示数据，不连接真实亚马逊接口，不做爬虫，"
+    "重点展示评论洞察到改品决策的最小闭环。"
+)
 
 
 # --------------------------------------------------------------------------
@@ -120,7 +146,7 @@ def sort_features(features: list[dict]) -> list[dict]:
     """
     enriched: list[dict] = []
     for feature in features or []:
-        copy = dict(feature)
+        copy = dict(feature) if isinstance(feature, dict) else {}
         nsi = calc_nsi(
             copy.get("positive"),
             copy.get("negative"),
@@ -132,10 +158,7 @@ def sort_features(features: list[dict]) -> list[dict]:
 
     def _key(item: dict):
         nsi = item.get("_nsi")
-        # None 值殿后：第一个分量 1，否则 0
         is_invalid = 1 if nsi is None else 0
-        # NSI 为 None 时给一个占位值（仅用于排序稳定，不影响分组），
-        # 同 NSI 时按 feature_name 字典序，feature_name 缺失则用空串。
         sort_nsi = nsi if nsi is not None else 0.0
         return (is_invalid, sort_nsi, str(item.get("feature_name", "")))
 
@@ -150,15 +173,13 @@ def health_score(features: list[dict]) -> int | None:
     """根据所有有效 NSI 计算整体健康度评分（0~100 整数）。
 
     score = round((average_nsi + 1) * 50)
-
-    若没有任何有效 NSI 值（features 为空，或所有 total<=0），返回 None。
-    本函数依赖 sort_features 已附加的 _nsi 字段；若调用方未排序，
-    则自行调用 calc_nsi 兜底，保证可独立使用。
     """
     if not features:
         return None
     valid: list[float] = []
     for f in features:
+        if not isinstance(f, dict):
+            continue
         nsi = f.get("_nsi")
         if nsi is None:
             nsi = calc_nsi(f.get("positive"), f.get("negative"), f.get("total"))
@@ -182,15 +203,10 @@ def health_label(score: int | None) -> str:
 
 
 # --------------------------------------------------------------------------
-# T4 · ASIN 输入与分析触发
+# T4 · ASIN 输入解析
 # --------------------------------------------------------------------------
 def _resolve_asin(manual_input: str, sample_asin: str | None) -> str | None:
-    """根据"手动输入优先"规则解析最终用于分析的 ASIN。
-
-    - 手动输入非空（去空白后）→ 使用手动输入，并 strip().upper() 标准化。
-    - 否则使用 selectbox 当前选中的示例 ASIN。
-    - 两者都为空 → 返回 None。
-    """
+    """根据"手动输入优先"规则解析最终用于分析的 ASIN。"""
     cleaned = (manual_input or "").strip()
     if cleaned:
         return cleaned.upper()
@@ -208,83 +224,210 @@ def _count_colors(sorted_features: list[dict]) -> dict:
     return buckets
 
 
-def _render_result(asin: str, asin_data: dict) -> None:
-    """渲染单个 ASIN 的最小分析结果（T3-T8 验收级别，不含 T9-T11 卡片）。"""
-    features = asin_data.get("features", []) or []
-    sorted_feats = sort_features(features)
+def _safe_text(value, fallback: str = "暂无") -> str:
+    """T12 兜底：把缺失 / 空白字段统一渲染成『暂无』，避免 None 直显或抛异常。"""
+    if value is None:
+        return fallback
+    text = str(value).strip()
+    return text if text else fallback
+
+
+def _format_nsi(nsi: float | None) -> str:
+    """T10 卡片用：把 NSI 数值统一格式化为 2 位小数字符串，None → 'N/A'。"""
+    if nsi is None:
+        return "N/A"
+    try:
+        return f"{nsi:.2f}"
+    except (TypeError, ValueError):
+        return "N/A"
+
+
+# --------------------------------------------------------------------------
+# T9 · 概览渲染
+# --------------------------------------------------------------------------
+def _render_overview(asin: str, asin_data: dict, sorted_feats: list[dict]) -> None:
+    """T9：分析概览（产品标题 / ASIN / 类目 / 摘要 / 健康度 / 红黄绿灰计数）。"""
     score = health_score(sorted_feats)
     label = health_label(score)
     counts = _count_colors(sorted_feats)
 
-    # 基本信息
-    st.markdown(f"### {asin_data.get('title', asin)}")
+    st.header("分析概览")
+    st.subheader(_safe_text(asin_data.get("title"), asin))
+
     info_cols = st.columns(3)
-    info_cols[0].markdown(f"**ASIN**：`{asin_data.get('asin', asin)}`")
-    info_cols[1].markdown(f"**类目**：{asin_data.get('category', '-')}")
+    info_cols[0].markdown(f"**ASIN**：`{_safe_text(asin_data.get('asin'), asin)}`")
+    info_cols[1].markdown(f"**类目**：{_safe_text(asin_data.get('category'))}")
     info_cols[2].markdown(f"**特征数**：{len(sorted_feats)}")
 
     summary = asin_data.get("summary")
     if summary:
-        st.caption(summary)
+        st.caption(_safe_text(summary))
 
-    # 整体健康度
+    st.markdown("---")
+
     metric_cols = st.columns(2)
-    metric_cols[0].metric("整体健康度评分", "无数据" if score is None else f"{score} / 100")
+    metric_cols[0].metric(
+        "整体健康度评分",
+        "无数据" if score is None else f"{score} / 100",
+    )
     metric_cols[1].metric("健康度档位", label)
 
-    # 红黄绿灰计数
     count_cols = st.columns(4)
-    count_cols[0].metric("🟥 红色（紧急修复）", counts["red"])
-    count_cols[1].metric("🟨 黄色（持续优化）", counts["yellow"])
-    count_cols[2].metric("🟩 绿色（保持卖点）", counts["green"])
-    count_cols[3].metric("⬜ 灰色（数据缺失）", counts["gray"])
+    count_cols[0].metric("🔴 红色（紧急修复）", counts["red"])
+    count_cols[1].metric("🟡 黄色（持续优化）", counts["yellow"])
+    count_cols[2].metric("🟢 绿色（保持卖点）", counts["green"])
+    count_cols[3].metric("⚪ 灰色（数据缺失）", counts["gray"])
 
-    # 简单排序表（T9 才升级为彩色卡片）
-    table_rows = []
-    for f in sorted_feats:
-        nsi = f.get("_nsi")
-        table_rows.append(
-            {
-                "feature_name": f.get("feature_name", ""),
-                "NSI": "N/A" if nsi is None else round(nsi, 2),
-                "color": f.get("_color", "gray"),
-                "attribution": f.get("attribution", ""),
-                "positive": f.get("positive", 0),
-                "negative": f.get("negative", 0),
-                "total": f.get("total", 0),
-            }
+    if score is None:
+        st.info("当前 ASIN 没有任何有效 NSI 值，可能是 total 全部为 0 或字段缺失，已按『无数据』处理。")
+    elif counts["red"] > 0:
+        st.warning(f"检测到 {counts['red']} 个红色特征，建议优先修复（见下方红色卡片）。")
+
+
+# --------------------------------------------------------------------------
+# T10 + T11 · 彩色卡片 + 详情展开
+# --------------------------------------------------------------------------
+def _render_feature_card(index: int, feat: dict) -> None:
+    """T10：单个特征的彩色卡片；T11：内嵌 expander 显示详情。"""
+    color = feat.get("_color", "gray")
+    emoji = COLOR_EMOJI.get(color, "⚪")
+    color_zh = COLOR_LABEL.get(color, "未知")
+
+    nsi = feat.get("_nsi")
+    nsi_str = _format_nsi(nsi)
+
+    feature_name = _safe_text(feat.get("feature_name"), "（未命名特征）")
+    attribution_raw = _safe_text(feat.get("attribution"), "")
+    attribution_key = attribution_raw.upper() if attribution_raw and attribution_raw != "暂无" else ""
+    attribution_label = ATTRIBUTION_TEXT.get(attribution_key, f"未知归因（{attribution_raw}）")
+
+    positive = feat.get("positive", 0) or 0
+    negative = feat.get("negative", 0) or 0
+    total = feat.get("total", 0) or 0
+
+    action = _safe_text(feat.get("action"))
+    diagnosis = _safe_text(feat.get("diagnosis"))
+    listing_rewrite = _safe_text(feat.get("listing_rewrite"))
+    examples = feat.get("examples") or []
+
+    # 卡片主体：用 container(border=True) 实现轻量分隔；不引入 CSS。
+    with st.container(border=True):
+        head_cols = st.columns([1, 6, 2])
+        head_cols[0].markdown(f"<div style='font-size:34px;line-height:1'>{emoji}</div>", unsafe_allow_html=True)
+        head_cols[1].markdown(
+            f"### {index}. {feature_name}\n"
+            f"**{color_zh}** · NSI = `{nsi_str}` · 归因：`{attribution_key or '?'}` — {attribution_label}"
         )
-    if table_rows:
-        st.dataframe(table_rows, use_container_width=True, hide_index=True)
-    else:
+        head_cols[2].metric("NSI", nsi_str)
+
+        meta_cols = st.columns(3)
+        meta_cols[0].markdown(f"👍 正面提及：**{positive}**")
+        meta_cols[1].markdown(f"👎 负面提及：**{negative}**")
+        meta_cols[2].markdown(f"📊 相关评论：**{total}**")
+
+        st.markdown(f"**🛠 推荐动作**：{action}")
+
+        # T11 · 详情展开
+        with st.expander("📂 查看详情：原始评论示例 / 诊断 / Listing 改写"):
+            st.markdown("**🩺 诊断**")
+            st.write(diagnosis)
+
+            st.markdown("**🛠 推荐动作**")
+            st.write(action)
+
+            st.markdown("**📝 Listing 改写建议**")
+            st.write(listing_rewrite)
+
+            st.markdown("**💬 评论示例**")
+            if not examples:
+                st.write("暂无")
+            else:
+                for ex in examples:
+                    if not isinstance(ex, dict):
+                        continue
+                    polarity = (ex.get("polarity") or "").strip().lower()
+                    text = _safe_text(ex.get("text"))
+                    # 恶意归因下的 negative 视为可疑，用 ⚠️
+                    if attribution_key == "M" and polarity == "negative":
+                        icon = "⚠️"
+                    elif polarity == "negative":
+                        icon = "❌"
+                    elif polarity == "positive":
+                        icon = "✅"
+                    elif polarity in {"neutral", "suspicious", "unknown"}:
+                        icon = "⚠️"
+                    else:
+                        icon = "•"
+                    st.markdown(f"- {icon} {text}")
+
+
+def _render_feature_cards(sorted_feats: list[dict]) -> None:
+    """T10：按 sort_features() 顺序输出所有彩色卡片。"""
+    if not sorted_feats:
         st.info("该 ASIN 暂无特征数据。")
+        return
+    st.header("特征改品清单（按紧急度排序）")
+    st.caption("排序逻辑：红色（紧急修复）→ 黄色（持续优化）→ 绿色（保持卖点）→ 灰色（数据缺失）。")
+    for i, feat in enumerate(sorted_feats, start=1):
+        _render_feature_card(i, feat)
+
+
+# --------------------------------------------------------------------------
+# 单 ASIN 渲染入口（包裹 T9 + T10 + T11，并 try/except 做最后一层 T12 兜底）
+# --------------------------------------------------------------------------
+def _render_result(asin: str, asin_data: dict) -> None:
+    """渲染单个 ASIN 的完整分析结果。"""
+    try:
+        if not isinstance(asin_data, dict):
+            st.warning(f"ASIN `{asin}` 的数据结构异常，已跳过渲染。")
+            return
+
+        raw_features = asin_data.get("features")
+        if raw_features is None:
+            features: list[dict] = []
+        elif not isinstance(raw_features, list):
+            st.warning(f"ASIN `{asin}` 的 features 字段不是数组，已按空处理。")
+            features = []
+        else:
+            features = [f for f in raw_features if isinstance(f, dict)]
+
+        sorted_feats = sort_features(features)
+
+        _render_overview(asin, asin_data, sorted_feats)
+        st.markdown("---")
+        _render_feature_cards(sorted_feats)
+    except Exception as exc:  # T12 最终兜底，避免任何未预期异常把页面打穿
+        st.error("渲染分析结果时出现意外错误，已为你拦截，避免页面崩溃。")
+        st.caption(f"错误类型：{type(exc).__name__}（已对终端用户屏蔽堆栈）")
 
 
 # --------------------------------------------------------------------------
 # 主入口
 # --------------------------------------------------------------------------
 def main() -> None:
-    st.set_page_config(page_title="NSI 决策引擎", page_icon="🟢", layout="centered")
+    st.set_page_config(page_title="NSI 决策引擎", page_icon="🟢", layout="wide")
 
     st.title("NSI 决策引擎")
     st.subheader("先改哪个，怎么改")
+    st.caption(DEMO_DISCLAIMER)
 
     data = load_data()
     asin_options: list[str] = sorted(data.keys()) if data else []
 
-    # 输入区
-    sample_asin = st.selectbox(
-        "选择示例 ASIN",
-        options=asin_options,
-        index=0 if asin_options else None,
-        placeholder="（暂无示例数据）" if not asin_options else None,
-    )
-    manual_input = st.text_input(
-        "或手动输入 ASIN（手动输入优先）",
-        value="",
-        placeholder="例如 B0DEMO-CUP",
-    )
-    analyze_clicked = st.button("Analyze", type="primary")
+    with st.container(border=True):
+        st.markdown("**🔎 选择或输入要分析的 ASIN**")
+        sample_asin = st.selectbox(
+            "选择示例 ASIN",
+            options=asin_options,
+            index=0 if asin_options else None,
+            placeholder="（暂无示例数据）" if not asin_options else None,
+        )
+        manual_input = st.text_input(
+            "或手动输入 ASIN（手动输入优先，自动 strip + 大写）",
+            value="",
+            placeholder="例如 B0DEMO-CUP",
+        )
+        analyze_clicked = st.button("Analyze", type="primary")
 
     # 状态：用 session_state 持久化已分析的 ASIN，避免后续 rerun 丢失
     if "analyzed_asin" not in st.session_state:
@@ -294,24 +437,35 @@ def main() -> None:
         st.session_state["analyzed_asin"] = _resolve_asin(manual_input, sample_asin)
 
     target_asin = st.session_state["analyzed_asin"]
+
+    # T12 · 用户尚未点击或输入
     if target_asin is None:
         if analyze_clicked:
             st.info("请先选择一个示例 ASIN，或在输入框中填写要分析的 ASIN。")
+        else:
+            st.info("👈 在上方选择示例 ASIN 或手动输入，然后点击 Analyze 开始分析。")
+        st.caption(DEMO_DISCLAIMER)
         return
 
+    # T12 · 数据未加载成功（load_data 已 st.error，避免重复报错）
     if not data:
-        # load_data 已通过 st.error 提示，这里不再重复报错
+        st.caption(DEMO_DISCLAIMER)
         return
 
+    # T12 · ASIN 不在演示数据集
     if target_asin not in data:
         st.warning(
-            f"未找到 ASIN：{target_asin}。当前演示数据仅包含："
+            f"未找到 ASIN：**{target_asin}**。当前演示数据仅包含："
             + "、".join(asin_options)
             + "。本 MVP 不连接亚马逊真实接口，请选择上方示例。"
         )
+        st.caption(DEMO_DISCLAIMER)
         return
 
     _render_result(target_asin, data[target_asin])
+
+    st.markdown("---")
+    st.caption(DEMO_DISCLAIMER)
 
 
 if __name__ == "__main__":
